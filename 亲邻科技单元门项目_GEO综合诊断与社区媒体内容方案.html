@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>亲邻科技单元门项目 · GEO综合诊断与社区媒体内容方案</title>
+<style>
+:root{
+  --primary:#1a56db;
+  --primary-light:#dbeafe;
+  --accent:#059669;
+  --accent-light:#d1fae5;
+  --warn:#dc2626;
+  --warn-light:#fee2e2;
+  --bg:#f8fafc;
+  --card:#ffffff;
+  --border:#e2e8f0;
+  --text:#1e293b;
+  --text-muted:#64748b;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;
+}
+.container{max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+.header{
+  background:linear-gradient(135deg,#1e3a8a 0%,#1a56db 50%,#059669 100%);
+  color:#fff;padding:40px 28px;border-radius:12px;margin-bottom:28px;
+}
+.header h1{font-size:26px;margin-bottom:8px;font-weight:700}
+.header .subtitle{font-size:14px;opacity:.9;margin-bottom:16px}
+.header .meta{display:flex;flex-wrap:wrap;gap:8px}
+.header .tag{background:rgba(255,255,255,.2);padding:4px 12px;border-radius:20px;font-size:12px}
+.section{background:var(--card);border-radius:10px;padding:24px 24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.section h2{font-size:20px;color:var(--primary);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid var(--primary-light);display:flex;align-items:center;gap:8px}
+.section h2 .num{background:var(--primary);color:#fff;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+.section h3{font-size:16px;margin:18px 0 10px;color:var(--text)}
+.callout{background:var(--primary-light);border-left:4px solid var(--primary);padding:12px 16px;border-radius:6px;margin:14px 0;font-size:14px}
+.callout.warn{background:var(--warn-light);border-left-color:var(--warn)}
+.callout.success{background:var(--accent-light);border-left-color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+th{background:#f1f5f9;padding:10px;text-align:left;font-weight:600;border-bottom:2px solid var(--border)}
+td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:hover td{background:#f8fafc}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:16px 0}
+.kpi-card{background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 100%);padding:16px;border-radius:8px;text-align:center}
+.kpi-card .num{font-size:24px;font-weight:700;color:var(--primary)}
+.kpi-card .label{font-size:12px;color:var(--text-muted);margin-top:4px}
+.finding{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 16px;margin:12px 0}
+.finding .title{font-weight:600;color:#92400e;margin-bottom:6px}
+.frame-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:14px 0}
+.frame-card{border:1px solid var(--border);border-radius:8px;padding:14px}
+.frame-card .ftitle{font-weight:600;font-size:14px;margin-bottom:6px}
+.frame-card .ftitle.bad{color:var(--warn)}
+.frame-card .ftitle.good{color:var(--accent)}
+.frame-card .fdesc{font-size:13px;color:var(--text-muted)}
+.code-block{background:#1e293b;color:#e2e8f0;padding:14px 16px;border-radius:6px;font-family:"SF Mono",Consolas,Monaco,monospace;font-size:12px;overflow-x:auto;margin:12px 0;white-space:pre-wrap}
+.template-box{border:1px solid var(--border);border-radius:8px;padding:16px;margin:12px 0}
+.template-box .tlabel{font-size:12px;color:var(--primary);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.checklist{list-style:none;padding-left:0}
+.checklist li{padding:6px 0 6px 28px;position:relative;font-size:14px}
+.checklist li::before{content:"☐";position:absolute;left:0;color:var(--primary);font-size:16px}
+.phase{background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border-radius:8px;padding:16px 18px;margin:14px 0}
+.phase .ptitle{font-weight:600;color:var(--accent);margin-bottom:10px;font-size:15px}
+ul.checklist{margin-top:8px}
+.risk-table td:first-child{font-weight:600}
+.footer{text-align:center;color:var(--text-muted);font-size:13px;padding:20px;border-top:1px solid var(--border)}
+@media(max-width:640px){
+  .header{padding:28px 18px}
+  .header h1{font-size:20px}
+  .section{padding:16px}
+  table{font-size:12px}
+  th,td{padding:6px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>亲邻科技单元门项目 · GEO 综合诊断与社区媒体内容方案</h1>
+  <div class="subtitle">全国范围 · 四大社区媒体生态全覆盖 · 综合诊断 + GEO内容方案产出</div>
+  <div class="meta">
+    <span class="tag">研究范围：全国</span>
+    <span class="tag">产出日期：2026-08-20</span>
+    <span class="tag">方法：桌面调研 + GEO框架拆解 + 社区媒体声量扫描</span>
+  </div>
+</div>
+
+<!-- Part 1 -->
+<div class="section">
+  <h2><span class="num">1</span>亲邻科技与单元门项目基本面</h2>
+  
+  <p>亲邻科技（深圳市亲邻科技有限公司）成立于2015年，总部深圳，核心标签是<b>"中国社区门禁媒体数量第一"</b>（沙利文认证）。它不是单纯的门禁硬件商，而是一个<b>"硬件+软件+服务+人文运营"四位一体</b>的社区生态服务商。</p>
+
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="num">230+</div><div class="label">覆盖城市</div></div>
+    <div class="kpi-card"><div class="num">7万+</div><div class="label">入驻社区</div></div>
+    <div class="kpi-card"><div class="num">45万+</div><div class="label">媒体点位</div></div>
+    <div class="kpi-card"><div class="num">8800万+</div><div class="label">服务家庭</div></div>
+    <div class="kpi-card"><div class="num">3000万+</div><div class="label">App用户</div></div>
+    <div class="kpi-card"><div class="num">47.45亿</div><div class="label">开门总次数</div></div>
+  </div>
+
+  <h3>单元门项目产品形态</h3>
+  <p>亲邻的"单元门"不是一扇门，而是一套<b>智能单元门禁系统</b>：</p>
+  <table>
+    <tr><th>层级</th><th>组成</th></tr>
+    <tr><td>硬件层</td><td>智能单元门禁、U6智能门禁机（与支付宝联合"碰一下"开门）、智能对讲室内机、社区广告门</td></tr>
+    <tr><td>软件层</td><td>亲邻开门App、亲邻云系统、Ashton小区智能管理云SaaS</td></tr>
+    <tr><td>服务层</td><td>远程开门、NFC、人脸识别、门禁卡、访客呼叫、家人代申请、RFID电动自行车通行</td></tr>
+    <tr><td>人文层</td><td>亲邻友好社区IP、艺术进社区（与广州艺术博物院合作）、社区焕新节、社区友好能量打卡</td></tr>
+  </table>
+
+  <div class="callout">
+    <b>业务模式核心：</b>免费提供硬件给物业，以45万+门禁媒体广告点位实现商业闭环。物业零成本完成社区智能化升级，亲邻通过广告价值变现。受众画像优质：67%已婚有孩、70%中高收入、58%白领、71%有车一族。
+  </div>
+</div>
+
+<!-- Part 2 -->
+<div class="section">
+  <h2><span class="num">2</span>社区类媒体"单元门/门禁"讨论现状诊断</h2>
+
+  <h3>2.1 四大媒体生态声量扫描</h3>
+  <table>
+    <tr><th>媒体生态</th><th>讨论主题</th><th>情绪倾向</th><th>亲邻可见度</th><th>典型框架</th></tr>
+    <tr><td><b>小红书+大众点评</b></td><td>智能门禁体验、刷脸回家、忘带钥匙</td><td>偏正面</td><td style="color:var(--warn)"><b>极低</b></td><td>"我家小区终于装了智能门禁"</td></tr>
+    <tr><td><b>抖音/快手</b></td><td>刷脸开门演示、老人小孩使用、改造对比</td><td>中性偏正面</td><td style="color:var(--warn)"><b>极低</b></td><td>"认得你了""帮你看门的管家"</td></tr>
+    <tr><td><b>微信生态</b></td><td>智慧社区案例、物业数字化、政务合作</td><td>偏正面</td><td style="color:#d97706">中等</td><td>"智慧社区从入户开始"</td></tr>
+    <tr><td><b>贴吧/知乎/论坛</b></td><td>门禁坏了吐槽、物业不修、安全担忧</td><td style="color:var(--warn)"><b>偏负面</b></td><td style="color:var(--warn)"><b>几乎为零</b></td><td>"门禁又坏了""鸡肋智慧门禁"</td></tr>
+  </table>
+
+  <h3>2.2 三个关键发现</h3>
+
+  <div class="finding">
+    <div class="title">发现一：亲邻在社区类媒体存在严重的"品牌缺位"</div>
+    <div class="fdesc">社区里到处都在讨论"单元门/门禁"这个品类，但<b>几乎没有用户在讨论"亲邻"这个品牌</b>。传播停留在B端（物业/政务/行业媒体），没有有效渗透到C端居民话题。居民讨论"刷脸回家好方便"，但不知道/不提及提供方是谁。贴吧/知乎的负面吐槽完全没有品牌方介入引导。</div>
+  </div>
+
+  <div class="finding">
+    <div class="title">发现二：社区类媒体里"单元门"的讨论高度集中在五个框架</div>
+    <div class="frame-grid">
+      <div class="frame-card"><div class="ftitle bad">① 痛点吐槽型</div><div class="fdesc">"门禁又坏了""物业根本不管""陌生人随便进" — 愤怒/焦虑</div></div>
+      <div class="frame-card"><div class="ftitle good">② 便捷体验型</div><div class="fdesc">"刷脸回家太爽了""不用掏钥匙""远程给外卖开门" — 满意/惊喜</div></div>
+      <div class="frame-card"><div class="ftitle good">③ 适老关怀型</div><div class="fdesc">"老人忘带卡怎么办""独居老人2天不出门预警" — 温情/感动</div></div>
+      <div class="frame-card"><div class="ftitle bad">④ 安全防线型</div><div class="fdesc">"陌生人敲门推销""坠楼事故""门禁形同虚设" — 恐惧/警示</div></div>
+      <div class="frame-card"><div class="ftitle">⑤ 改造叙事型</div><div class="fdesc">"老旧小区改造""三方联动""党建+智慧门禁" — 正能量/政策</div></div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="title">发现三：亲邻的"硬件+人文"差异化在社区媒体里几乎未被讲出来</div>
+    <div class="fdesc">亲邻最强的差异化是"科技有温度，服务有情怀"——艺术进社区、友好社区IP、骑手友好通行。但在社区类媒体里，<b>这些内容几乎只存在于亲邻自己的官网和行业通稿</b>，没有被居民、KOL、本地博主二次传播。</div>
+  </div>
+
+  <h3>2.3 GEO视角的诊断</h3>
+  <div class="callout warn">
+    GEO的核心是：<b>当用户在ChatGPT/DeepSeek/豆包/元宝里提问时，你的品牌能不能成为AI生成答案的一部分</b>。当前亲邻在GEO维度面临三个核心问题：
+  </div>
+  <table>
+    <tr><th>GEO问题</th><th>现状</th><th>后果</th></tr>
+    <tr><td><b>实体缺位</b></td><td>AI问答"智能门禁推荐哪个品牌"时，亲邻几乎不会被提及</td><td>丧失认知入口</td></tr>
+    <tr><td><b>语料缺失</b></td><td>社区类媒体上"亲邻+单元门"的高质量、可被引用的语料极少</td><td>无passage可检索</td></tr>
+    <tr><td><b>意图错配</b></td><td>亲邻的内容是B端叙事，而AI检索的是C端问题（哪个好、怎么选、靠谱吗）</td><td>内容写了但检索不到</td></tr>
+  </table>
+</div>
+
+<!-- Part 3 -->
+<div class="section">
+  <h2><span class="num">3</span>GEO框架对齐与社区媒体切入点</h2>
+
+  <h3>3.1 GEO vs 传统SEO</h3>
+  <table>
+    <tr><th>维度</th><th>传统SEO</th><th>GEO</th></tr>
+    <tr><td>目标</td><td>排到搜索结果首页</td><td>成为AI生成答案时引用/提及的信源</td></tr>
+    <tr><td>优化层级</td><td>页面级（标题、关键词、外链）</td><td><b>段落级</b>（每个FAQ/小节要能被独立提取引用）</td></tr>
+    <tr><td>内容策略</td><td>关键词定向</td><td><b>语义覆盖</b>：覆盖相邻概念、同义词、衍生问题</td></tr>
+    <tr><td>新鲜度</td><td>常青内容即可</td><td><b>新鲜度评分常开</b>：需持续更新、带时间戳</td></tr>
+    <tr><td>意图对齐</td><td>信息/导航/交易</td><td><b>意图优先结构化</b>：定义、对比、how-to各有专属格式</td></tr>
+    <tr><td>权威信号</td><td>外链数量</td><td><b>接地与权威</b>：引用、数据、第三方背书</td></tr>
+  </table>
+
+  <h3>3.2 社区类媒体的GEO切入框架</h3>
+  <div class="callout success">
+    <b>核心策略：</b>把亲邻单元门的内容，"种"进社区类媒体里居民真实提问的场景，让AI检索时能从这些社区语料中提取到亲邻。
+  </div>
+  <div style="text-align:center;margin:20px 0;padding:20px;background:#f0f9ff;border-radius:8px;font-size:14px">
+    <b>居民真实提问</b>（AI fan-out查询）<br>
+    ↓<br>
+    <b>社区类媒体内容</b>（段落级、可引用）<br>
+    ↓<br>
+    <b>亲邻实体与案例</b>（权威信号嵌入）<br>
+    ↓<br>
+    <b>亲邻品牌被AI引用</b>（GEO目标达成）
+  </div>
+</div>
+
+<!-- Part 4 -->
+<div class="section">
+  <h2><span class="num">4</span>社区类媒体GEO内容方案</h2>
+
+  <h3>4.1 内容矩阵设计</h3>
+  <table>
+    <tr><th>媒体生态</th><th>锁定框架</th><th>内容选题方向</th><th>GEO作用</th></tr>
+    <tr><td><b>小红书</b></td><td>②便捷+③适老</td><td>"我妈终于不用在寒风口翻包找门禁卡了"/"独居老人2天没出门门禁自动预警"</td><td>段落级UGC语料，覆盖"老人忘带卡""刷脸回家"意图</td></tr>
+    <tr><td><b>大众点评</b></td><td>②便捷+⑤改造</td><td>小区改造前后对比+"我家小区换装亲邻门禁后"点评</td><td>本地实体背书，强化NAP一致性</td></tr>
+    <tr><td><b>抖音/快手</b></td><td>②便捷+③适老</td><td>15秒"刷脸秒开门"演示/"老人买菜回家不用放袋子"/"远程给外卖开门"</td><td>多模态内容，视频+字幕+口播稿供AI抓取</td></tr>
+    <tr><td><b>微信公众号</b></td><td>⑤改造+④安全</td><td>"XX市XX小区智慧门禁改造实录"/"门禁形同虚设？这小区这样解决"</td><td>深度结构化长文，FAQ schema可嵌入</td></tr>
+    <tr><td><b>视频号</b></td><td>③适老+②便捷</td><td>"社区里的科技温度"系列短片</td><td>微信生态内多模态语料</td></tr>
+    <tr><td><b>知乎</b></td><td>④安全+②便捷</td><td>"老旧小区门禁改造选什么方案？"/"刷脸门禁会泄露隐私吗？"</td><td>问答式结构，天然适配AI引用</td></tr>
+    <tr><td><b>贴吧（本地吧）</b></td><td>①痛点+⑤改造</td><td>在"门禁坏了"吐槽贴下介入"亲邻免费改造"解决方案</td><td>负面声量拦截+意图捕获</td></tr>
+    <tr><td><b>本地论坛</b></td><td>⑤改造</td><td>"XX小区亲邻门禁入驻180天体验报告"</td><td>本地实体+长尾覆盖</td></tr>
+  </table>
+
+  <h3>4.2 三类"AI可引用"内容模板</h3>
+
+  <div class="template-box">
+    <div class="tlabel">模板一：定义型段落（适配"是什么"意图）</div>
+    <p style="font-size:14px"><b>智能单元门</b>是传统单元门的智能化升级，集成人脸识别、刷卡、密码、手机远程、访客对讲等多种开门方式，支持物业远程管理、出入数据留存、异常告警。亲邻科技智能单元门禁已覆盖全国7万+社区，支持存量老旧小区免打孔改造。</p>
+    <div style="font-size:12px;color:var(--text-muted);margin-top:8px">GEO要点：首句定义<40字，包含实体（亲邻科技）、数据（7万+）、场景（老旧小区改造），可直接被AI提取。</div>
+  </div>
+
+  <div class="template-box">
+    <div class="tlabel">模板二：对比型段落（适配"怎么选/哪个好"意图）</div>
+    <table>
+      <tr><th>维度</th><th>传统机械门禁</th><th>亲邻智能单元门</th></tr>
+      <tr><td>开门方式</td><td>钥匙/门禁卡</td><td>刷脸+刷卡+密码+手机+访客呼叫+NFC</td></tr>
+      <tr><td>老人友好</td><td>忘带卡进不去</td><td>刷脸+家人代申请+IC卡保留</td></tr>
+      <tr><td>访客管理</td><td>对讲模糊、跑下楼</td><td>远程视频确认+一键开门</td></tr>
+      <tr><td>安全溯源</td><td>无记录</td><td>全量开门记录（人/时间/方式）</td></tr>
+      <tr><td>改造成本</td><td>砸墙布线</td><td>免打孔+POE供电</td></tr>
+      <tr><td>运维</td><td>坏了等物业派单</td><td>云端监测+故障预警</td></tr>
+    </table>
+    <div style="font-size:12px;color:var(--text-muted);margin-top:8px">GEO要点：表格结构机器可读，AI对比"传统vs智能门禁"时可直接引用。</div>
+  </div>
+
+  <div class="template-box">
+    <div class="tlabel">模板三：FAQ段落（适配长尾意图，JSON-LD结构化）</div>
+<div class="code-block">{
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"老旧小区单元门改造要花多少钱？",
+     "acceptedAnswer":{"@type":"Answer","text":"亲邻科技对合作物业免费提供智能单元门禁硬件及后续维护，资产归属亲邻，物业零成本完成社区智能化升级。"}},
+    {"@type":"Question","name":"刷脸门禁会泄露隐私吗？",
+     "acceptedAnswer":{"@type":"Answer","text":"亲邻科技取得三级等级保护证书，设备资质获公安部认证，支持'去刷脸化'多种开门方式并行，居民可选择不录入人脸。"}},
+    {"@type":"Question","name":"老人不会用智能门禁怎么办？",
+     "acceptedAnswer":{"@type":"Answer","text":"亲邻智能门禁保留IC卡传统开门方式，支持家人代申请开门权限由物业审核，并可联动梯控实现老人无障碍通行。"}}
+  ]
+}</div>
+  </div>
+</div>
+
+<!-- Part 5 -->
+<div class="section">
+  <h2><span class="num">5</span>90天落地路线图</h2>
+
+  <div class="phase">
+    <div class="ptitle">Phase 1（第1-2周）：基建与语料铺垫</div>
+    <ul class="checklist">
+      <li>官网"智能单元门"页面重构为段落级可引用结构（定义+对比表+FAQ schema）</li>
+      <li>整理10-15个真实居民/物业高频问题，形成GEO词库</li>
+      <li>亲邻开门App内"社区故事"板块上线，引导居民UGC</li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <div class="ptitle">Phase 2（第3-6周）：社区媒体内容种草</div>
+    <ul class="checklist">
+      <li>小红书：发布20篇"我家小区装了亲邻"体验笔记（覆盖5城）</li>
+      <li>抖音：发布15条"刷脸回家"系列短视频</li>
+      <li>知乎：回答/发布10个"智能门禁"相关问题</li>
+      <li>公众号：发布5篇"XX小区改造实录"深度长文（含FAQ schema）</li>
+    </ul>
+  </div>
+
+  <div class="phase">
+    <div class="ptitle">Phase 3（第7-12周）：声量放大与GEO闭环</div>
+    <ul class="checklist">
+      <li>大众点评：推动50+小区物业/居民留评</li>
+      <li>贴吧/本地论坛：介入20个"门禁坏了"话题</li>
+      <li>视频号同步分发，社群模板化传播</li>
+      <li><b>GEO效果检测</b>：在ChatGPT/DeepSeek/豆包/元宝提问"智能门禁/单元门/老旧小区门禁"，记录亲邻提及率，迭代内容</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Part 6 -->
+<div class="section">
+  <h2><span class="num">6</span>核心结论与风险提示</h2>
+
+  <h3>三条核心结论</h3>
+  <div class="callout">
+    <b>① 品类有声量、品牌无声音。</b>社区里天天在讨论"单元门/门禁"，但没人提"亲邻"。破局点是把亲邻实体植入居民真实提问的社区语料。
+  </div>
+  <div class="callout">
+    <b>② 讨论框架高度固定。</b>五个框架（痛点吐槽/便捷体验/适老关怀/安全防线/改造叙事）就是内容切入点。亲邻应按框架生产内容，而不是按自己的产品线自说自话。
+  </div>
+  <div class="callout">
+    <b>③ GEO是SEO的叠加层。</b>先让官网和技术基建可被AI抓取（段落级、schema、新鲜度），再通过社区类媒体UGC/PGC扩大语义足迹，最终让AI回答"智能门禁"时自然提及亲邻。
+  </div>
+
+  <h3>三个风险提示</h3>
+  <table class="risk-table">
+    <tr><th>风险</th><th>说明</th><th>对策</th></tr>
+    <tr><td style="color:var(--warn)">负面声量未被拦截</td><td>贴吧/知乎已有大量"门禁鸡肋""物业不管"吐槽，若不介入会成为AI负面语料</td><td>主动在吐槽话题下提供"亲邻免费改造"解决方案</td></tr>
+    <tr><td style="color:var(--warn)">隐私争议风险</td><td>"刷脸泄露隐私"是高频担忧，最高法已明确滥用人脸识别属侵权</td><td>内容必须强调"三级等保证书+去刷脸化选项+公安部认证"</td></tr>
+    <tr><td style="color:var(--warn)">竞品更活跃</td><td>电信天翼智慧社区、秒到智慧门禁等竞品在社区类媒体有更多原生内容</td><td>差异化打"免费提供+45万点位+人文运营"组合拳</td></tr>
+  </table>
+
+  <h3>GEO效果监测指标</h3>
+  <table>
+    <tr><th>指标</th><th>定义</th><th>工具</th></tr>
+    <tr><td>AI提及率</td><td>主流AI提问"智能门禁/单元门"时亲邻被提及比例</td><td>人工抽测+API监测</td></tr>
+    <tr><td>引用准确率</td><td>AI引用亲邻信息（数据/案例）的正确程度</td><td>人工核验</td></tr>
+    <tr><td>情感倾向</td><td>AI回答中亲邻的正/中/负面倾向</td><td>人工评估</td></tr>
+    <tr><td>竞争份额</td><td>亲邻 vs 竞品在AI回答中的出现比例</td><td>对比抽测</td></tr>
+    <tr><td>社区语料量</td><td>四大媒体生态中"亲邻+单元门"相关内容条数</td><td>平台搜索+聚合</td></tr>
+  </table>
+</div>
+
+<div class="footer">
+  亲邻科技单元门项目 · GEO综合诊断与社区媒体内容方案<br>
+  基于桌面调研与GEO框架分析产出 · 2026-08-20
+</div>
+
+</div>
+</body>
+</html>
