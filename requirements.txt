@@ -1,0 +1,14 @@
+# AIpDOOH 知识库框架依赖
+# ---- MVP 脚手架（零外部依赖，仅 numpy）----
+numpy>=1.24
+
+# ---- 生产路径（按需安装）----
+pymilvus>=2.4          # 分布式向量库
+FlagEmbedding>=1.2     # 本地 bge-m3 嵌入
+psycopg2-binary>=2.9   # PostgreSQL 元数据
+fastapi>=0.110         # 服务网关
+uvicorn>=0.29
+pyyaml>=6.0            # 配置文件
+# 富文本解析（生产替换 demo 分块）
+# unstructured>=0.11
+# marker-pdf>=1.0

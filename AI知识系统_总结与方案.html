@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 知识系统：总结归类 · 底层逻辑 · 落地方案</title>
+<style>
+  :root{
+    --bg:#0f1419; --card:#1a212b; --ink:#e8edf2; --muted:#9fb0c0;
+    --green:#3ddc97; --blue:#5aa9ff; --orange:#ffb454; --red:#ff6b6b; --purple:#b18cff;
+    --line:#2a3340;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg);color:var(--ink);line-height:1.8;font-size:16px}
+  header{background:linear-gradient(135deg,#13243b,#0f1419);padding:40px 24px 30px;text-align:center;border-bottom:1px solid var(--line)}
+  header h1{margin:0 0 10px;font-size:30px;letter-spacing:.5px}
+  header p{margin:4px 0;color:var(--muted)}
+  .wrap{max-width:1040px;margin:0 auto;padding:24px 20px 60px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin:18px 0}
+  h2{color:var(--green);border-left:4px solid var(--green);padding-left:12px;margin-top:34px;font-size:22px}
+  h3{color:var(--blue);margin-top:24px;font-size:18px}
+  h4{color:var(--orange);margin-bottom:6px}
+  p,li{color:var(--ink)}
+  .muted{color:var(--muted)}
+  code{background:#0c1118;border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--orange);font-size:14px}
+  .tag{display:inline-block;background:#0c1118;border:1px solid var(--line);border-radius:20px;padding:2px 11px;font-size:12.5px;color:var(--muted);margin:3px 2px}
+  .callout{border-left:4px solid var(--orange);background:#1d1810;padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0}
+  .callout.blue{border-color:var(--blue);background:#0e1726}
+  .callout.green{border-color:var(--green);background:#0c1b15}
+  .callout.purple{border-color:var(--purple);background:#16111f}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14.5px}
+  th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}
+  th{background:#0c1118;color:var(--green)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+  .src{font-size:14.5px}
+  .num{font-weight:800;color:var(--blue)}
+  .pill{display:inline-block;padding:2px 10px;border-radius:8px;font-size:13px;font-weight:700}
+  .pill.t{background:#0e1726;color:var(--blue);border:1px solid var(--blue)}
+  .pill.p{background:#16111f;color:var(--purple);border:1px solid var(--purple)}
+  ul.tight li{margin:4px 0}
+  .big{font-size:19px;font-weight:700}
+  .formula{background:#0c1118;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0;font-size:17px;text-align:center;color:var(--green)}
+  footer{text-align:center;color:var(--muted);padding:30px;font-size:13px;border-top:1px solid var(--line)}
+  .kpi{color:var(--orange);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧠 AI 知识系统：总结归类 · 底层逻辑 · 落地方案</h1>
+  <p class="muted">综合两篇材料：腾讯《Agent 的上限，可能不在模型，而在团队知识》× Tom《我的知识库使用说明书（第二大脑）》</p>
+  <p class="muted">核心判断：<b>企业级与个人级，是同一范式（LLM Wiki）的两个尺度</b></p>
+</header>
+
+<div class="wrap">
+
+<!-- ============ TL;DR ============ -->
+<div class="card">
+  <h2 style="border-color:var(--green)">一句话结论</h2>
+  <p class="big">两篇材料讲的是<span class="pill t">组织级</span>和<span class="pill p">个人级</span>的同一件事：把"人写人读的仓库"升级成"人 + Agent 共读的供给系统"。底层逻辑高度一致——<b>结构化、靠流程/投放沉淀、闭环自增强、有进有出保鲜</b>。方案上，<b>用 Tom 的引擎做 MVP（今天就能跑），用腾讯的治理与飞轮做规模化扩展</b>。</p>
+</div>
+
+<!-- ============ 速览 ============ -->
+<h2>一、两篇材料速览</h2>
+<div class="grid2">
+  <div class="card src">
+    <h3><span class="pill t">腾讯文章</span> 团队知识底座</h3>
+    <p><b>视角：</b>组织 / 团队级（安全中心，12+ 研发与运营 Agent）</p>
+    <p><b>核心命题：</b>Agent 输出质量的上限，取决于你能给它什么质量的知识。堵点在两步——<b>检索精度</b>与<b>注入效率</b>，而非模型本身。</p>
+    <p><b>主线：</b>四问定目标 → 六步搭建 → 知识飞轮 → 四条反模式</p>
+    <p class="muted">硬数据：知识 99.7% 由流程自动沉淀；代码审查从 2–4 轮降到 1.1 轮；新人上手从 30 天压到 10 天；知识月增速 86→716→154(条)。</p>
+  </div>
+  <div class="card src">
+    <h3><span class="pill p">Tom 的 wiki</span> 个人第二大脑</h3>
+    <p><b>视角：</b>个人级（基于 Karpathy 的 LLM Wiki 模式）</p>
+    <p><b>核心命题：</b>别"存资料"，要"养 wiki"——把碎片资料<b>编译</b>成结构化、互链、可增量更新的笔记，让 AI "懂你"。</p>
+    <p><b>主线：</b>三层架构（RAW/Wiki/Schema）+ 三操作（Ingest/Query/Lint）+ 问答即学习闭环</p>
+    <p class="muted">硬数据：RAW 117 个原始文件 → Process 约 54 个编译页（含 14 个案例、994 条投放记录）；超 200 篇自动拆库；双周自动监测。</p>
+  </div>
+</div>
+
+<!-- ============ 归类 ============ -->
+<h2>二、总结归类</h2>
+<p>把两篇拆开看，会落在同一张概念地图上。同一行是"同一件事的不同尺度实现"：</p>
+
+<table>
+  <tr><th style="width:16%">概念模块</th><th><span class="pill t">腾讯（团队级）</span> 怎么做的</th><th><span class="pill p">Tom（个人级）</span> 怎么做的</th></tr>
+  <tr><td><b>定目标</b></td><td>"四问"：场景 / 消费者 / 装什么（L1–L4）/ 成功指标（命中率、盲搜下降率…）</td><td>单域专注 + 奥卡姆剃刀：先"懂你"，不贪全</td></tr>
+  <tr><td><b>分层结构</b></td><td>L1 公共基础 / L2 业务领域 / L3 场景策略 / L4 事件增量</td><td>RAW（只读）/ Wiki（编译）/ Schema（规则书）三层</td></tr>
+  <tr><td><b>知识形态</b></td><td>结构化卡片（适用条件·核心结论·应做/不应做）+ 文档型 + 向量型</td><td>结构化卡片（concept/entity/method/topic/case）+ <code>[[双向链接]]</code></td></tr>
+  <tr><td><b>生产</b></td><td>流程自动沉淀（99.7%）、复盘 Agent、运营即时沉淀</td><td>投放 RAW → 摄入引擎编译；问答自动蒸馏回 <code>Learning/</code></td></tr>
+  <tr><td><b>分发/消费</b></td><td>平台<b>主动注入</b>知识包（按 Agent 订阅，100% 到达）</td><td>先读 <code>INDEX.md</code> 总目录，再 <code>query ask</code> 综合带引用</td></tr>
+  <tr><td><b>治理/保鲜</b></td><td>双门禁 + 三层质量分级 + 默认 90 天有效期 + 退场复活</td><td><code>lint_wiki.py</code> 体检（断锚/矛盾/缺失/孤儿）+ 增量 manifest</td></tr>
+  <tr><td><b>飞轮</b></td><td>交付↑→知识↑→Agent↑→更快；注入即记账看板</td><td>问答即学习事件：问→综合→蒸馏→互链→更准</td></tr>
+  <tr><td><b>可观测</b></td><td>飞轮看板：规模/质量/时效/调用四维度</td><td>lint-log / ingest-log / monitoring-log + manifest</td></tr>
+</table>
+
+<div class="callout purple">
+  <b>归类后的关键洞察：</b>Tom 的 <code>RAW→Wiki→Schema</code> + <code>Ingest/Query/Lint</code> 几乎是腾讯"六步搭建 + 治理"的<b>个人版最小实现</b>。腾讯解决"团队规模"问题（多库、多 Agent、自动沉淀），Tom 解决"零到一可跑"问题（一个文件夹 + 三个脚本）。两者拼起来就是完整路径。
+</div>
+
+<!-- ============ 底层逻辑 ============ -->
+<h2>三、底层逻辑（7 条，且可统一）</h2>
+
+<p>剥掉"企业/个人""工具/平台"的外壳，两篇共同押注的是这 7 条底层逻辑：</p>
+
+<div class="card">
+  <h3>① 知识是"供给系统"，不是"仓库"</h3>
+  <p>传统知识库追求<b>存得多</b>；AI 时代追求<b>匹配得准、注入得快、过时的能自动淘汰</b>。卡点不是模型读不了长文，而是"从 2000 篇里精准捞出 2 篇"的检索精度，和"只喂相关的一段而非整篇"的注入效率。</p>
+</div>
+
+<div class="card">
+  <h3>② 结构化 + 人机共读，是检索与注入的解药</h3>
+  <p>纯自然语言长文语义边界模糊，召回会漂移。结构化卡片（带<b>适用条件、核心结论、应做/不应做</b>）同时解决精确匹配与低 token 注入。铁律：<b>一套知识，人和 Agent 都是消费者</b>。人看着都莫名其妙的知识，维护质量必差、时间一长就腐败。</p>
+</div>
+
+<div class="card">
+  <h3>③ 别指望人主动写——靠流程 / 投放沉淀</h3>
+  <p>腾讯：靠人写一定失败，所以把沉淀<b>绑死在流程必经节点</b>（需上线、已关联仓库才入池）。Tom：你只管"投喂 + 提问"，编译与蒸馏由引擎完成。共性：<b>知识应成为流程/行为的副产品，而非额外工作</b>。</p>
+</div>
+
+<div class="card">
+  <h3>④ 闭环 + 飞轮，是"越用越聪明"的本质</h3>
+  <p>两篇都跑同一条链：<b>生产 → 提炼 → 注入 → 消费 → 反馈 → 保鲜</b>。腾讯的飞轮是"交付越多越厚越强"；Tom 的飞轮是"问答即学习事件，蒸馏回库"。正向循环一旦转起来，能力随使用量一起涨。</p>
+</div>
+
+<div class="card">
+  <h3>⑤ 有进有出，信噪比 > 体量</h3>
+  <p>只进不出的库三个月变垃圾场。腾讯用"默认有效期 + 退场复活"防误杀；Tom 用"Lint 体检 + 增量追踪"防腐。规则：<b>密度比体量重要</b>，敢于"不沉淀"也能降噪。</p>
+</div>
+
+<div class="card">
+  <h3>⑥ 可观测、可追溯，才能治理</h3>
+  <p>腾讯"注入即记账"、飞轮看板；Tom 的各类 log + <code>INGEST_MANIFEST</code>。没有度量就没有治理——每条知识被谁用了、用几次、是否过期，必须自动留痕，不靠人填报。</p>
+</div>
+
+<div class="card">
+  <h3>⑦ 先"让 AI 懂你/懂组织"，再"教 AI 做事"</h3>
+  <p>奥卡姆剃刀：与其一步步教 Agent 执行，不如先构建一个它读得懂的知识底座。底层关系变了——<b>知识的主要消费者变成 Agent 后，生产方式、质量标准、分发逻辑都要随之重构</b>。</p>
+</div>
+
+<div class="formula">
+  知识飞轮 = 沉淀(Supply) × 结构(Structure) × 反馈(Loop)<br>
+  <span class="muted" style="font-size:14px">三者任一项趋近 0，系统就退化回"存资料的仓库"</span>
+</div>
+
+<!-- ============ 方案 ============ -->
+<h2>四、落地方案（5 阶段路线图）</h2>
+<p class="muted">建议：从一个具体场景闭环切入，跑通再横向扩展。飞轮"开始转"比"转得快"重要。</p>
+
+<div class="card">
+  <h3>阶段 0 · 定目标（先答四问）</h3>
+  <ul class="tight">
+    <li><b>服务什么场景？</b> 锚定业务痛点（如"需求交付慢""重复踩坑"），别写"我要建知识库"。</li>
+    <li><b>谁来消费？</b> 人 + Agent 都是消费者；结构要同时满足"人看得懂、Agent 查得准"。</li>
+    <li><b>装什么？</b> 按 L1–L4（或 RAW/Wiki/Schema）盘点，标清责任人 + 保鲜频率。</li>
+    <li><b>怎么算成功？</b> 设可观测指标：注入命中率、盲搜下降率、返工下降率、对话采纳率。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>阶段 1 · 搭骨架（分层 + 三操作）</h3>
+  <ul class="tight">
+    <li><b>三层架构：</b><code>RAW（只读原始）</code> → <code>Wiki（结构化卡片）</code> → <code>Schema（规则书/宪法）</code>。原始层坚决只读，保持证据性。</li>
+    <li><b>三操作引擎：</b><code>Ingest（摄入编译）</code> / <code>Query（先 INDEX 后综合）</code> / <code>Lint（体检）</code>。Tom 的 py 脚本可直接复用为 MVP。</li>
+    <li><b>知识分层：</b>L1 公共 / L2 业务 / L3 策略 / L4 事件增量，每层明确责任人与保鲜频率。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>阶段 2 · 跑通生产闭环</h3>
+  <ul class="tight">
+    <li><b>个人/小团队：</b>投放 RAW → 摄入引擎编译成卡片 → 自动登记进总目录。</li>
+    <li><b>团队规模化：</b>把沉淀绑到流程必经节点（提测通过、上线完成、事件关闭…），零人工操作。</li>
+    <li><b>铁律：</b>不靠人写，靠流程/投放；未达客观信号（如未上线）的知识一律暂存，不准入引用池。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>阶段 3 · 分发与消费</h3>
+  <ul class="tight">
+    <li><b>个人：</b>查库第一站永远是总目录 <code>INDEX.md</code>，再定向精搜；答案自动回传留痕。</li>
+    <li><b>团队：</b>平台<b>主动注入</b>知识包（按 Agent 订阅，分仓库专属包 + 公共包，不撒网），注入即记账。</li>
+    <li><b>飞轮钩子：</b>把"问答"当作学习事件，好答案蒸馏回知识库（Tom 的 <code>Learning/</code> 思路）。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>阶段 4 · 治理与保鲜</h3>
+  <ul class="tight">
+    <li><b>准入：</b>双门禁（已上线 + 已关联仓库才入池）；三层质量分级（可直接用 / 待确认 / 待验证）。</li>
+    <li><b>保鲜：</b>默认有效期（如 90 天）重校验；零引用过期自动归档，仍有引用/被点赞则复活防误杀。</li>
+    <li><b>体检：</b>定期跑 Lint，查断锚/矛盾/缺失/孤儿 + 时效；人工只做高价值复核。</li>
+    <li><b>扩展：</b>文档超 200 篇按领域拆子库，子库之间只互链不合并，保留各自结构。</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>阶段 5 · 飞轮加速（规模化）</h3>
+  <ul class="tight">
+    <li>贡献榜量化 + 可写进自评，但<b>核心仍是流程自动化把活干了</b>，别用 KPI 强压（反模式）。</li>
+    <li>飞轮看板一屏可见：规模 / 质量 / 时效 / AI 调用四维度，全靠"注入即记账"自动产生。</li>
+    <li>人的角色转变为"知识质量把关人"：Agent 干重复 80%，人做判断纠偏 20%。</li>
+  </ul>
+</div>
+
+<!-- ============ 个人最小可行版 ============ -->
+<h2>五、今天就能跑的最小可行版（个人/小团队）</h2>
+<p>直接照 Tom 的引擎落地，零平台依赖，一个文件夹 + 三个脚本即可起步，再按需叠加腾讯的治理层：</p>
+<div class="card">
+<pre><code>第二大脑/
+├── INDEX.md            ← 总目录（查库第一站）
+├── SCHEMA.md           ← 规则书（三层/三操作/命名宪法）
+├── ingest_wiki.py      ← 摄入：RAW → 结构化卡片
+├── query_wiki.py       ← 查询：先 INDEX 后综合，答案回传
+├── lint_wiki.py        ← 体检：断锚/矛盾/缺失/孤儿
+├── Inputs/RAW/         ← 第一层：原始资料（只读，每天投喂）
+├── Process/            ← 第二层：concept/entity/method/topic/case 卡片
+├── Learning/           ← 问答蒸馏出的洞察（飞轮燃料）
+└── Feedback/           ← 各类运行日志 + 复盘</code></pre>
+<p class="muted">操作节奏：日常只做两件事——<b>把文件丢进 RAW</b>、<b>有问题问它</b>；每两周跑一次 <code>lint_wiki.py</code> + 自动监测。其余交给引擎。团队侧要补的是：把 RAW 投喂改造成"流程节点自动沉淀"，并加上知识包主动注入与看板。</p>
+</div>
+
+<!-- ============ 反模式 ============ -->
+<h2>六、避坑：4 条反模式（两篇共识）</h2>
+<table>
+  <tr><th>反模式</th><th>后果</th><th>正解</th></tr>
+  <tr><td>✕ 强压 KPI 逼贡献</td><td>质量低、维护意愿更低</td><td>流程自动沉淀为主，激励为辅</td></tr>
+  <tr><td>✕ 只进不出无限膨胀</td><td>信噪比越来越低</td><td>有效期保鲜 + 退场复活</td></tr>
+  <tr><td>✕ 隐性知识无法显性化</td><td>专家离职带走 know-how</td><td>复盘专项 + 换岗交接 + 专家萃取</td></tr>
+  <tr><td>✕ 人机做成两套知识</td><td>维护质量差、快速腐败</td><td>人机共读，一套知识库</td></tr>
+</table>
+
+<!-- ============ 复用清单 ============ -->
+<h2>七、可直接复用的清单</h2>
+<div>
+  <span class="tag">四问定目标框架</span>
+  <span class="tag">L1–L4 分层盘点</span>
+  <span class="tag">RAW/Wiki/Schema 三层</span>
+  <span class="tag">Ingest/Query/Lint 三操作</span>
+  <span class="tag">结构化知识卡片</span>
+  <span class="tag">准入双门禁</span>
+  <span class="tag">三层质量分级</span>
+  <span class="tag">有效期 + 退场复活</span>
+  <span class="tag">知识包作分发容器</span>
+  <span class="tag">注入即记账</span>
+  <span class="tag">先 INDEX 后 Query</span>
+  <span class="tag">问答即学习（蒸馏回库）</span>
+  <span class="tag">200 篇拆库</span>
+  <span class="tag">飞轮看板四维度</span>
+</div>
+
+<div class="callout green">
+  <b>最终建议：</b>个人/小团队今天就用 Tom 引擎起步（MVP，零成本跑通闭环）；当知识量或协作人数上来，再引入腾讯的"流程绑定沉淀 + 知识包主动注入 + 治理看板"做规模化。两者共用一套底层逻辑，迁移成本极低——<b>关键是先让飞轮转起来</b>。
+</div>
+
+</div>
+
+<footer>
+  📚 综合自：腾讯技术工程《Agent 的上限，可能不在模型，而在团队知识》(2026-08-17) × duckwolf.cn/wiki.html《Tom 的第二大脑》<br>
+  一句话：企业级与个人级，是同一 LLM Wiki 范式在两个尺度的呈现。
+</footer>
+</body>
+</html>

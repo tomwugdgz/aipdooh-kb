@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIpDOOH 户外媒体知识库 + A2A 智能管理系统 · 底层框架与落地方案</title>
+<style>
+  :root{--bg:#0f1115;--panel:#171a21;--panel2:#1e222b;--line:#2a2f3a;--text:#e6e9ef;
+    --muted:#9aa3b2;--accent:#4f8cff;--accent2:#36c6a0;--warn:#ffb454;--danger:#ff6b6b;--chip:#222936}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.7;font-size:15px}
+  .wrap{max-width:1100px;margin:0 auto;padding:32px 22px 80px}
+  header{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:26px}
+  h1{font-size:25px;margin:0 0 8px;letter-spacing:.5px}
+  .sub{color:var(--muted);font-size:14px}
+  h2{font-size:21px;margin:38px 0 14px;padding-left:12px;border-left:4px solid var(--accent)}
+  h3{font-size:17px;margin:26px 0 10px;color:#cfe0ff}
+  h4{font-size:15px;margin:18px 0 8px;color:var(--accent2)}
+  p{margin:10px 0}
+  .muted{color:var(--muted)}
+  .note{background:linear-gradient(180deg,#1c2029,#171a21);border:1px solid var(--line);border-left:4px solid var(--accent2);border-radius:10px;padding:14px 18px;margin:18px 0}
+  .note b{color:var(--accent2)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+  .box{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:13px 15px}
+  .box .t{font-weight:600;color:#cfe0ff;margin-bottom:5px}
+  .box .d{color:var(--muted);font-size:13px}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#cfe0ff;font-weight:600}
+  tr:nth-child(even) td{background:#14171d}
+  code{background:var(--chip);padding:2px 6px;border-radius:5px;font-family:"SF Mono",Consolas,monospace;font-size:12.5px;color:#9fe0c8}
+  pre{background:#0b0d11;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto;font-size:12.5px}
+  pre code{background:none;padding:0;color:#d8e0ee}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+  .step{background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:13px}
+  .arrow{color:var(--accent);font-weight:700}
+  .pill{display:inline-block;padding:2px 9px;border-radius:6px;font-size:12px;font-weight:600}
+  .p-green{background:rgba(54,198,160,.15);color:var(--accent2)}
+  .p-blue{background:rgba(79,140,255,.15);color:var(--accent)}
+  .p-orange{background:rgba(255,180,84,.15);color:var(--warn)}
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 22px;margin:18px 0}
+  .toc a{color:var(--accent);text-decoration:none}.toc a:hover{text-decoration:underline}
+  .foot{margin-top:50px;padding-top:16px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+  .kbd{font-family:monospace;background:#0b0d11;border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>AIpDOOH 户外媒体知识库 + A2A 智能管理系统</h1>
+  <div class="sub">底层框架与落地方案 · 千亿级原始数据 / 十亿级知识单元 / 全本地私有化 / A2A 协议+自研编排</div>
+</header>
+
+<div class="note">
+  <b>目标画像（已与你确认）：</b>为 <b>AIpDOOH（AI 化程序化户外媒体）</b>搭建知识底座——沉淀<b>全量户外媒体案例 + 投放数据 + 公司知识</b>；
+  原始数据规模约<b>千亿级行</b>（播放/曝光/竞价日志等），用于 RAG 的<b>知识单元约十亿级 chunk</b>；
+  数据<b>必须全量留在本地</b>（不出域）；并以一套<b>让 AI 管理 A2A（Agent-to-Agent）智能体</b>的系统为上层目标。
+  本方案先交付一个<b>底层可运行的框架雏形</b>。同目录下已附可本地零依赖运行的脚手架 <code>aipdooh-kb/</code>。
+</div>
+
+<div class="toc">
+  <b>目录</b>
+  <ol>
+    <li><a href="#a1">总体架构：双引擎（湖仓 + 知识库）+ A2A 智能体层</a></li>
+    <li><a href="#a2">数据接入与湖仓（扛千亿级原始数据）</a></li>
+    <li><a href="#a3">知识加工与存储（十亿级 chunk 的分布式方案）</a></li>
+    <li><a href="#a4">知识计算：混合检索 + Rerank + 权限过滤</a></li>
+    <li><a href="#a5">A2A 智能体管理层（AI 管理 A2A 系统）</a></li>
+    <li><a href="#a6">全本地私有化部署与算力规划</a></li>
+    <li><a href="#a7">现实落地指南（分阶段排期）</a></li>
+    <li><a href="#a8">软件开发方案（模块 / 数据模型 / API / 流程）</a></li>
+    <li><a href="#a9">MVP 底层可运行框架脚手架说明</a></li>
+    <li><a href="#a10">风险与下一步</a></li>
+  </ol>
+</div>
+
+<!-- ===== 1 ===== -->
+<h2 id="a1">一、总体架构：双引擎 + A2A 智能体层</h2>
+<p>针对「千亿原始 / 十亿知识 / 全本地 / A2A」四个约束，采用 <b>双数据引擎</b> 设计：海量原始数据进<b>湖仓</b>（分析/特征/按需检索），精炼知识进<b>向量+图</b>（RAG 实时检索）；上层由 <b>A2A 智能体层</b> 统一调度。整体 8 层：</p>
+<div class="grid">
+  <div class="box"><div class="t">① 接入层</div><div class="d">媒体案例库 / DSP·ADX 投放日志 / 公司知识（Wiki·合同·玩法沉淀），Kafka 事件总线</div></div>
+  <div class="box"><div class="t">② 湖仓层</div><div class="d">Iceberg + MinIO + Spark/Flink + ClickHouse，扛千亿级原始与聚合特征</div></div>
+  <div class="box"><div class="t">③ 知识加工层</div><div class="d">解析→清洗→分块→媒体域元数据→实体/关系抽取，异步流水线</div></div>
+  <div class="box"><div class="t">④ 知识存储层</div><div class="d">Milvus(分布式) + NebulaGraph + PostgreSQL + Redis + MinIO</div></div>
+  <div class="box"><div class="t">⑤ 知识计算层</div><div class="d">Query改写→向量+BM25+图 混合召回→融合→Rerank→ACL过滤</div></div>
+  <div class="box"><div class="t">⑥ A2A 智能体层</div><div class="d">Agent Runtime(自研编排) + A2A协议适配 + 管理Agent调度领域智能体</div></div>
+  <div class="box"><div class="t">⑦ 知识服务层</div><div class="d">API网关(多租户/ACL/审计) + RAG问答 + Agent对话 + 管理后台</div></div>
+  <div class="box"><div class="t">⑧ 运营管理</div><div class="d">生命周期/版本/增量更新/评测(RAGAS)/反馈闭环/看板</div></div>
+</div>
+
+<!-- ===== 2 ===== -->
+<h2 id="a2">二、数据接入与湖仓（扛千亿级原始数据）</h2>
+<h3>2.1 数据源与连接器</h3>
+<table>
+  <tr><th>数据源</th><th>内容</th><th>接入方式</th><th>量级</th></tr>
+  <tr><td>媒体案例库 / 点位库</td><td>屏位、商圈、屏型、覆盖、历史案例、创意</td><td>JDBC/API 批+增量</td><td>千万~亿级</td></tr>
+  <tr><td>DSP / ADX 投放日志</td><td>播放、曝光、竞价、排期、转化</td><td>Kafka 流 + 对象存储批量</td><td><b>千亿级行</b></td></tr>
+  <tr><td>公司知识沉淀</td><td>Wiki、合同、销售玩法、复盘、培训</td><td>连接器批采 + Webhook</td><td>百万~千万文档</td></tr>
+</table>
+<h3>2.2 湖仓选型（全本地）</h3>
+<ul>
+  <li><b>对象存储</b>：MinIO（S3 兼容，本地部署），存原始日志与原文。</li>
+  <li><b>表格式</b>：Apache Iceberg（ACID、隐藏分区、时间旅行，利于增量更新与回溯）。</li>
+  <li><b>计算</b>：Spark（批量 ETL，清洗/特征/聚合）、Flink（投放日志实时入湖）、Trino（即席查询）。</li>
+  <li><b>OLAP</b>：ClickHouse（投放日志的毫秒级聚合分析，支撑数据 Agent 即时问答）。</li>
+  <li><b>作用</b>：千亿级原始数据不直接进向量库；湖仓负责「全量留存 + 特征/聚合 + 冷知识按需检索后即时向量化」。</li>
+</ul>
+
+<!-- ===== 3 ===== -->
+<h2 id="a3">三、知识加工与存储（十亿级 chunk 的分布式方案）</h2>
+<h3>3.1 加工流水线</h3>
+<table>
+  <tr><th>工序</th><th>户外媒体域要点</th></tr>
+  <tr><td>解析</td><td>案例PDF/合同/投放报告；marker/unstructured；表格与屏位结构保留</td></tr>
+  <tr><td>清洗</td><td>去噪、去重、脱敏（客户名/合同金额走脱敏策略）</td></tr>
+  <tr><td>分块</td><td>语义分块 512–1024 token + 重叠；<b>媒体域元数据</b>：城市/商圈/屏型/客户行业/时段/时效</td></tr>
+  <tr><td>抽取</td><td>实体：点位/客户/行业/创意/Campaign；关系：投放于/转化于/竞品/地域，入图</td></tr>
+  <tr><td>向量化</td><td>bge-m3 本地批量（GPU 集群），写入 Milvus</td></tr>
+</table>
+<h3>3.2 分布式存储</h3>
+<table>
+  <tr><th>存储</th><th>选型（本地）</th><th>存什么 / 规模应对</th></tr>
+  <tr><td>向量库</td><td><b>Milvus 分布式集群</b></td><td>十亿级 chunk；按租户/业务分 collection 与 shard，副本+冷热分层</td></tr>
+  <tr><td>图库</td><td><b>NebulaGraph</b></td><td>实体-关系，分布式扛大规模图谱推理</td></tr>
+  <tr><td>关系库</td><td>PostgreSQL（主）+ 可选 TiDB</td><td>元数据/ACL/租户/审计/评测</td></tr>
+  <tr><td>缓存</td><td>Redis</td><td>热点问答、会话、嵌入缓存</td></tr>
+  <tr><td>对象</td><td>MinIO</td><td>原文与附件（与湖仓共用）</td></tr>
+</table>
+<div class="note"><b>十亿级向量工程要点：</b>① 分片（shard）按业务/租户；② <b>冷热分层</b>——高频案例/近期投放进热集（高副本），历史冷知识走湖仓按需取；③ 批量嵌入用独立 GPU 集群 + 断点续传；④ 索引用 HNSW/DiskANN 平衡召回与内存。</div>
+
+<!-- ===== 4 ===== -->
+<h2 id="a4">四、知识计算：混合检索 + Rerank + 权限过滤</h2>
+<div class="flow">
+  <span class="step">Query改写/扩展</span><span class="arrow">→</span>
+  <span class="step">向量召回(Milvus)</span><span class="arrow">→</span>
+  <span class="step">BM25召回(PG/ES)</span><span class="arrow">→</span>
+  <span class="step">图召回(Nebula)</span><span class="arrow">→</span>
+  <span class="step">RRF融合</span><span class="arrow">→</span>
+  <span class="step">Rerank(bge)</span><span class="arrow">→</span>
+  <span class="step">ACL过滤</span><span class="arrow">→</span>
+  <span class="step">Top-K</span>
+</div>
+<ul>
+  <li><b>Embedding</b>：bge-m3（支持稠密+稀疏，天然适配混合检索），全本地。</li>
+  <li><b>混合召回</b>：向量补语义、BM25 保精确术语（如屏型编号/客户名）、图补关系推理。</li>
+  <li><b>Rerank</b>：bge-reranker 交叉编码器，仅对召回 Top-N 重排，控成本。</li>
+  <li><b>ACL 过滤</b>：检索结果按 <code>tenant_id / dept / level</code> 强制过滤，安全红线。</li>
+</ul>
+
+<!-- ===== 5 ===== -->
+<h2 id="a5">五、A2A 智能体管理层（AI 管理 A2A 系统）</h2>
+<p>采用 <b>Google A2A 协议（AgentCard / Task / JSON-RPC over HTTP + 鉴权）</b> 作为智能体互操作标准，内部用<b>自研编排运行时</b>做任务分解与调度。核心是一个<b>管理 Agent</b> 统筹多个领域智能体。</p>
+<h3>5.1 智能体编队</h3>
+<table>
+  <tr><th>Agent</th><th>职责</th><th>依赖</th></tr>
+  <tr><td><b>管理 Agent</b>（AI 管理 A2A）</td><td>接收高层目标→拆解→经 A2A 派发→监控→聚合→护栏</td><td>全部</td></tr>
+  <tr><td>知识 Agent</td><td>RAG 问答，检索知识库/湖仓</td><td>检索层</td></tr>
+  <tr><td>媒体规划 Agent</td><td>基于案例与数据做点位/商圈/排期规划</td><td>知识+数据</td></tr>
+  <tr><td>投放优化 Agent</td><td>pDOOH 竞价/预算/频次优化</td><td>湖仓+数据Agent</td></tr>
+  <tr><td>创意 Agent</td><td>按屏型/受众生成或适配创意</td><td>LLM</td></tr>
+  <tr><td>数据 Agent</td><td>湖仓/ClickHouse 即席分析与归因</td><td>湖仓</td></tr>
+  <tr><td>合规/客户 Agent</td><td>合同、品牌安全、出域与权限校验</td><td>ACL/审计</td></tr>
+</table>
+<h3>5.2 交互与治理</h3>
+<ul>
+  <li><b>对外互操作</b>：每个 Agent 暴露 <code>AgentCard</code>（能力/端点/鉴权），经 A2A Task 协议通信，可被外部系统调用。</li>
+  <li><b>内部编排</b>：管理 Agent 用自研运行时做目标拆解、依赖编排、并行/串行调度、超时与重试。</li>
+  <li><b>护栏</b>：所有跨 Agent 动作经合规 Agent 校验；敏感操作需人工确认；全链路审计。</li>
+</ul>
+
+<!-- ===== 6 ===== -->
+<h2 id="a6">六、全本地私有化部署与算力规划</h2>
+<table>
+  <tr><th>组件</th><th>本地部署</th><th>算力建议（起步）</th></tr>
+  <tr><td>LLM 推理</td><td>vLLM 部署 Qwen2.5-72B / DeepSeek-R1</td><td>2–4× 中端 GPU（如 A10/A100），张量并行</td></tr>
+  <tr><td>Embedding / Rerank</td><td>bge-m3 / bge-reranker 本地</td><td>1–2× GPU 或 CPU 批处理集群</td></tr>
+  <tr><td>向量库</td><td>Milvus 分布式（多节点）</td><td>内存随十亿级 chunk 增长，需认真评估</td></tr>
+  <tr><td>湖仓</td><td>MinIO + Spark + ClickHouse</td><td>大容量本地磁盘 + 计算节点</td></tr>
+  <tr><td>网络</td><td>隔离内网，零出域</td><td>无外网出口；模型权重离线导入</td></tr>
+</table>
+<div class="note"><b>合规底线：</b>① 全链路无外网出口；② 检索时 ACL 强制过滤；③ 敏感字段脱敏；④ 审计日志留存；⑤ 模型权重与数据均离线导入，禁止回传。</div>
+
+<!-- ===== 7 ===== -->
+<h2 id="a7">七、现实落地指南（分阶段排期）</h2>
+<table>
+  <tr><th>阶段</th><th>目标</th><th>范围</th><th>周期</th></tr>
+  <tr><td><span class="pill p-orange">阶段0 准备</span></td><td>定目标/盘数据/过合规</td><td>场景与数据源清单、脱敏策略、算力到位</td><td>1–2 周</td></tr>
+  <tr><td><span class="pill p-green">阶段1 底层框架MVP</span></td><td><b>可运行框架雏形</b></td><td>基础设施 + 单源接入 + 分块/向量 + 检索API + 最小RAG UI + 知识Agent + A2A运行时骨架 + 管理Agent派发</td><td>6–8 周</td></tr>
+  <tr><td><span class="pill p-blue">阶段2 知识库规模化</span></td><td>十亿级知识 + 多源</td><td>多连接器、湖仓、图、混合检索+Rerank、ACL多租户、运营后台</td><td>8–10 周</td></tr>
+  <tr><td><span class="pill p-blue">阶段3 A2A 全智能体</span></td><td>智能体系统成型</td><td>全编队、A2A互操作、护栏、评测闭环</td><td>持续</td></tr>
+</table>
+
+<!-- ===== 8 ===== -->
+<h2 id="a8">八、软件开发方案</h2>
+<h3>8.1 核心模块</h3>
+<table>
+  <tr><th>模块</th><th>职责</th><th>技术</th></tr>
+  <tr><td>Connector Service</td><td>多源采集/增量/归一</td><td>Python + SDK + Kafka</td></tr>
+  <tr><td>Lakehouse ETL</td><td>入湖/特征/聚合</td><td>Spark/Flink + Iceberg + ClickHouse</td></tr>
+  <tr><td>Processing</td><td>解析/清洗/分块/抽取</td><td>unstructured/marker + 语义分块</td></tr>
+  <tr><td>Embedding Svc</td><td>文本→向量(批量)</td><td>bge-m3（GPU）</td></tr>
+  <tr><td>Retrieval</td><td>混合召回/融合/Rerank/ACL</td><td>Milvus+PG+Neo4j+自研</td></tr>
+  <tr><td>Agent Runtime</td><td>A2A编排/管理Agent</td><td>自研 + A2A SDK</td></tr>
+  <tr><td>Gateway/Auth</td><td>多租户/ACL/审计/限流</td><td>JWT + 网关</td></tr>
+</table>
+<h3>8.2 数据模型（示意）</h3>
+<pre><code>documents(id, tenant_id, source, doc_type, title, raw_uri, status, version, created_at)
+chunks(id, doc_id, tenant_id, idx, content, embedding vector, meta jsonb, acl jsonb)
+entities(id, name, type, tenant_id)            -- 点位/客户/行业/创意
+relations(id, from_id, to_id, type)            -- 投放于/转化于/竞品
+acls(id, tenant_id, dept, level, doc_id)
+agents(card_id, name, endpoint, auth, caps jsonb)   -- A2A AgentCard
+tasks(id, agent_id, parent_id, goal, status, result) -- A2A Task
+feedbacks(id, chat_id, chunk_id, rating, correction)</code></pre>
+<h3>8.3 关键 API</h3>
+<table>
+  <tr><th>方法</th><th>路径</th><th>说明</th></tr>
+  <tr><td>POST</td><td><code>/api/v1/ingest</code></td><td>触发采集加工流水线</td></tr>
+  <tr><td>POST</td><td><code>/api/v1/search</code></td><td>混合检索（ACL过滤）</td></tr>
+  <tr><td>POST</td><td><code>/api/v1/chat</code></td><td>RAG 问答（带引用）</td></tr>
+  <tr><td>POST</td><td><code>/api/v1/agent/task</code></td><td>提交 A2A 任务给管理 Agent</td></tr>
+  <tr><td>GET</td><td><code>/api/v1/.well-known/agent.json</code></td><td>A2A AgentCard 发现</td></tr>
+</table>
+
+<!-- ===== 9 ===== -->
+<h2 id="a9">九、MVP 底层可运行框架脚手架</h2>
+<p>同目录 <code>aipdooh-kb/</code> 是一个<b>可本地零依赖运行</b>的框架雏形：用 numpy 实现的内存向量检索做 fallback，使 <code>ingest</code> 与 <code>query</code> 在任意机器直接跑通；生产环境把 <code>SimpleVectorStore</code> 换成 <code>MilvusVectorStore</code>、把 <code>MockEmbedder</code> 换成 <code>BgeEmbedder</code> 即可。已含 A2A 运行时骨架（管理 Agent 派发到知识 Agent）。</p>
+<pre><code># 本地直接跑（无需 GPU / 外部服务）
+cd aipdooh-kb
+python pipelines/ingest.py      # 写入示例户外媒体案例
+python pipelines/query.py "某商圈 LED 大屏适合哪些行业投放？"</code></pre>
+<p>生产基础设施用 <code>docker-compose.yml</code> 一键起 Milvus / PostgreSQL / MinIO / Redis / NebulaGraph / vLLM。</p>
+
+<!-- ===== 10 ===== -->
+<h2 id="a10">十、风险与下一步</h2>
+<table>
+  <tr><th>风险</th><th>对策</th></tr>
+  <tr><td>十亿级向量内存/成本</td><td>分片 + 冷热分层 + DiskANN + 批量嵌入集群</td></tr>
+  <tr><td>千亿日志查询慢</td><td>ClickHouse 物化聚合 + 湖仓按需检索+即时向量化</td></tr>
+  <tr><td>幻觉/越权</td><td>引用溯源 + ACL 强制过滤 + 合规 Agent 护栏</td></tr>
+  <tr><td>A2A 失控</td><td>管理 Agent 管控 + 超时重试 + 敏感操作人工确认 + 审计</td></tr>
+  <tr><td>数据过期</td><td>湖仓增量 + 版本 + 时效元数据 + 反馈触发更新</td></tr>
+</table>
+<h3>下一步</h3>
+<ol>
+  <li>确认<b>真实数据源清单与字段</b>、<b>知识单元目标规模</b>，我据此精调分片/算力规划。</li>
+  <li>在 <code>aipdooh-kb/</code> 脚手架上，指定优先接入的<b>第一个数据源</b>与<b>第一个场景</b>，我扩展对应连接器与 Agent。</li>
+  <li>决定是否由我直接把脚手架跑通并补充 <b>Milvus / bge-m3 / vLLM** 生产路径适配。</b></li>
+</ol>
+<div class="foot">本方案依据你确认的量纲与约束定制：千亿原始→湖仓、十亿知识→分布式向量+图、全本地私有化、A2A 协议+自研编排。脚手架已随附并可本地运行。</div>
+</div>
+</body>
+</html>
